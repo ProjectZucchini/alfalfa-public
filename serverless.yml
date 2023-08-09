@@ -1,0 +1,65 @@
+service: "alfalfa"
+
+plugins:
+  - serverless-esbuild
+  - serverless-offline
+
+package:
+  individually: true
+  patterns:
+    - "!node_modules/.prisma/client/libquery_engine-*"
+    - "node_modules/.prisma/client/libquery_engine-linux-arm64-*"
+    - "!node_modules/prisma/libquery_engine-*"
+    - "!node_modules/@prisma/engines/**"
+
+custom:
+  esbuild:
+    plugins: esbuild-plugins.js
+    sourcemap: true
+  offline:
+    useChildProcesses: true
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-2
+  vpc:
+    subnetIds:
+      # Managed by Terraform
+      - subnet-xyz
+    securityGroupIds:
+      # Managed by Terraform
+      - sg-xyz
+  logs:
+    restApi: true
+  environment:
+    NODE_OPTIONS: "--enable-source-maps"
+
+functions:
+  github:
+    handler: apps/github/src/index.handler
+    environment: ${file(./env.${opt:stage, 'local'}.yml):github-environment}
+    events:
+      - http:
+          path: /github/hello
+          method: get
+      - http:
+          path: /github/post-install
+          method: get
+      - http:
+          path: /api/github/webhooks
+          method: post
+
+  slack:
+    handler: apps/slack/src/index.handler
+    environment: ${file(./env.${opt:stage, 'local'}.yml):slack-environment}
+    events:
+      - http:
+          path: /slack/install
+          method: get
+      - http:
+          path: /slack/oauth_redirect
+          method: get
+      - http:
+          path: /slack/events
+          method: post

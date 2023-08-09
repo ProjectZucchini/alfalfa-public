@@ -1,0 +1,13 @@
+node_modules/
+
+# Ignore Private Keys
+**/*.pem
+
+.env
+.serverless
+.esbuild
+
+# Ignore env yaml files
+env.local.yml
+
+**/yarn-error.log

@@ -1,0 +1,8 @@
+# Ignore artifacts:
+apps/frontend/dist
+apps/github/dist
+apps/slack/dist
+
+packages/database/dist
+packages/database/generated
+packages/slack-lib/dist

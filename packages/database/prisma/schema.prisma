@@ -1,0 +1,271 @@
+enum AchievementUserQualifyRestriction {
+  REPOSITORY // User can only receive once per repository
+  ORGANIZATION // User can only receive once per organization
+  GLOBAL // User can only receive once across all repositories
+}
+
+model Achievement {
+  id                     Int                               @id @default(autoincrement())
+  name                   String
+  description            String                            @db.VarChar(255)
+  type                   Int                               @unique
+  imageUrl               String
+  userQualifyRestriction AchievementUserQualifyRestriction @default(ORGANIZATION)
+  createdAt              DateTime                          @default(now())
+  updatedAt              DateTime                          @updatedAt
+  deletedAt              DateTime?
+
+  githubEvents     GitHubEventAchievement[]
+  userAchievements UserAchievement[]
+}
+
+model GitHubEvent {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  gitHubEventAchievements GitHubEventAchievement[]
+}
+
+model GitHubEventAchievement {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  achievementId Int
+  achievement   Achievement @relation(fields: [achievementId], references: [id])
+  githubEventId Int
+  githubEvent   GitHubEvent @relation(fields: [githubEventId], references: [id])
+
+  @@unique([achievementId, githubEventId])
+}
+
+enum GithubOrganizationType {
+  ENTERPRISE
+  ORGANIZATION
+  USER
+}
+
+model GitHubOrganization {
+  id                   Int                    @id @default(autoincrement())
+  externalId           Int                    @unique
+  name                 String
+  type                 GithubOrganizationType
+  githubInstallationId Int?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  deletedAt            DateTime?
+
+  githubRepositories GitHubRepository[]
+  organization       Organization?
+}
+
+model GitHubRepository {
+  id         Int      @id @default(autoincrement())
+  externalId Int
+  name       String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  githubOrganizationId Int
+  githubOrganization   GitHubOrganization @relation(fields: [githubOrganizationId], references: [id])
+
+  gitHubRepositoryCounts GitHubRepositoryCounts[]
+  gitHubUserCounts       GitHubUserCounts[]
+  userAchievementReasons UserAchievementReason[]
+}
+
+model GitHubRepositoryCounts {
+  id                 Int      @id @default(autoincrement())
+  pullRequestsMerged Int      @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  githubRepositoryId Int
+  githubRepository   GitHubRepository @relation(fields: [githubRepositoryId], references: [id])
+}
+
+model GitHubUser {
+  id         Int      @id @default(autoincrement())
+  externalId Int      @unique
+  login      String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  githubUserCounts GitHubUserCounts[]
+  users            User[]
+}
+
+model GitHubUserCounts {
+  id                 Int      @id @default(autoincrement())
+  issues             Int      @default(0)
+  pullRequests       Int      @default(0)
+  pullRequestsMerged Int      @default(0)
+  reviews            Int      @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  githubUserId       Int
+  githubUser         GitHubUser       @relation(fields: [githubUserId], references: [id])
+  githubRepositoryId Int
+  githubRepository   GitHubRepository @relation(fields: [githubRepositoryId], references: [id])
+}
+
+model Organization {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  githubOrganizationId Int?                @unique
+  githubOrganization   GitHubOrganization? @relation(fields: [githubOrganizationId], references: [id])
+  slackWorkspaceId     Int?                @unique
+  slackWorkspace       SlackWorkspace?     @relation(fields: [slackWorkspaceId], references: [id])
+
+  users User[]
+}
+
+enum PollType {
+  SINGLE_VOTE
+  MULTI_VOTE
+}
+
+model Poll {
+  id             Int       @id @default(autoincrement())
+  topic          String
+  channelId      String
+  anonymousVotes Boolean   @default(false)
+  type           PollType  @default(SINGLE_VOTE)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+  closedAt       DateTime?
+
+  slackUserId Int
+  slackUser   SlackUser @relation(fields: [slackUserId], references: [id])
+
+  pollOptions PollOption[]
+}
+
+model PollOption {
+  id        Int       @id @default(autoincrement())
+  option    String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  pollId Int
+  poll   Poll @relation(fields: [pollId], references: [id])
+
+  pollVotes PollVote[]
+}
+
+model PollVote {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  pollOptionId Int
+  pollOption   PollOption @relation(fields: [pollOptionId], references: [id])
+  slackUserId  Int
+  slackUser    SlackUser  @relation(fields: [slackUserId], references: [id])
+}
+
+model SlackShare {
+  id        Int      @id @default(autoincrement())
+  channelId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  slackUserId       Int
+  slackUser         SlackUser       @relation(fields: [slackUserId], references: [id])
+  userAchievementId Int
+  userAchievement   UserAchievement @relation(fields: [userAchievementId], references: [id])
+}
+
+model SlackWorkspace {
+  id           Int       @id @default(autoincrement())
+  teamId       String    @unique
+  installation Json
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  organization Organization?
+  slackUsers   SlackUser[]
+}
+
+model SlackUser {
+  id         Int      @id @default(autoincrement())
+  externalId String   @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  slackWorkspaceId Int
+  slackWorkspace   SlackWorkspace @relation(fields: [slackWorkspaceId], references: [id])
+
+  polls       Poll[]
+  pollVotes   PollVote[]
+  slackShares SlackShare[]
+  users       User[]
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  githubUserId   Int
+  githubUser     GitHubUser   @relation(fields: [githubUserId], references: [id])
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  slackUserId    Int?
+  slackUser      SlackUser?   @relation(fields: [slackUserId], references: [id])
+
+  userAchievements UserAchievement[]
+
+  @@unique([organizationId, githubUserId])
+}
+
+model UserAchievement {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  achievementId Int
+  achievement   Achievement @relation(fields: [achievementId], references: [id])
+  userId        Int
+  user          User        @relation(fields: [userId], references: [id])
+
+  slackShares           SlackShare[]
+  userAchievementReason UserAchievementReason?
+}
+
+enum GitHubArtifactType {
+  PULL_REQUEST
+  ISSUE
+}
+
+model UserAchievementReason {
+  id           Int                @id @default(autoincrement())
+  artifactType GitHubArtifactType
+  artifactId   Int
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  githubRepositoryId Int
+  githubRepository   GitHubRepository @relation(fields: [githubRepositoryId], references: [id])
+  userAchievementId  Int              @unique
+  userAchievement    UserAchievement  @relation(fields: [userAchievementId], references: [id])
+}
+
+generator client {
+  provider      = "prisma-client-js"
+  output        = "../generated/client"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}

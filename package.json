@@ -1,0 +1,62 @@
+{
+  "name": "@zucchini/alfalfa",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "db:build": "npm -w @alfalfa/database run build",
+    "db:generate": "npx -w @alfalfa/database prisma generate",
+    "db:generate:watch": "npm -w @alfalfa/database run generate:watch",
+    "slack-lib:watch": "npm -w @alfalfa/slack-lib run build:watch",
+    "start:serverless": "export SLS_DEBUG=true; node --inspect --enable-source-maps ./node_modules/.bin/serverless offline -s local --noPrependStageInUrl --reloadHandler",
+    "start:frontend": "npm -w @alfalfa/frontend run start:watch",
+    "deploy:frontend": "npm -w @alfalfa/frontend run deploy",
+    "deploy:serverless": "npx sls deploy -s prod",
+    "deploy:github": "npx sls deploy function -f github -s prod",
+    "deploy:slack": "npx sls deploy function -f slack -s prod",
+    "dev": "npm run db:build && concurrently \"npm:start:serverless\" \"npm:db:generate:watch\" \"npm:start:frontend\" \"npm:slack-lib:watch\"",
+    "lint": "prettier -c . && eslint .",
+    "prettier": "prettier -w ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ProjectZucchini/alfalfa.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ProjectZucchini/alfalfa/issues"
+  },
+  "homepage": "https://github.com/ProjectZucchini/alfalfa#readme",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "apps/github",
+      "apps/slack",
+      "apps/frontend",
+      "packages/database",
+      "packages/slack-lib"
+    ],
+    "nohoist": [
+      "**/github/**",
+      "**/slack/**",
+      "**/database/**",
+      "**/slack-lib/**"
+    ]
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "6.2.0",
+    "@typescript-eslint/parser": "6.2.0",
+    "concurrently": "8.2.0",
+    "esbuild": "0.18.17",
+    "eslint": "^8.45.0",
+    "eslint-config-prettier": "^8.9.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "eslint-plugin-react": "^7.33.0",
+    "prettier": "^3.0.0",
+    "serverless": "3.33.0",
+    "serverless-esbuild": "1.46.0",
+    "serverless-offline": "^12.0.4"
+  }
+}

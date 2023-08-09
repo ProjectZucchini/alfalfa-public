@@ -1,0 +1,36 @@
+{
+  "name": "@alfalfa/database",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "generate:watch": "nodemon -w prisma -e prisma --exec \"npx prisma generate\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ProjectZucchini/alfalfa.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ProjectZucchini/alfalfa/issues"
+  },
+  "homepage": "https://github.com/ProjectZucchini/alfalfa#readme",
+  "dependencies": {
+    "@prisma/client": "5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.4.5",
+    "nodemon": "3.0.1",
+    "prisma": "5.0.0",
+    "ts-node": "^10.9.1",
+    "typescript": "5.1.6"
+  },
+  "prisma": {
+    "seed": "ts-node --esm prisma/seed.ts"
+  }
+}

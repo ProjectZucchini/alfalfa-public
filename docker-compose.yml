@@ -1,0 +1,11 @@
+version: "3"
+services:
+  db:
+    image: mysql:8.0.32
+    container_name: alfalfa-db
+    environment:
+      MYSQL_DATABASE: "db"
+      MYSQL_ROOT_PASSWORD: "password123"
+      TZ: UTC
+    ports:
+      - 3307:3306

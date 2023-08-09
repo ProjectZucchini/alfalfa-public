@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `GitHubOrganization` MODIFY `type` ENUM('ENTERPRISE', 'ORGANIZATION', 'USER') NOT NULL;
