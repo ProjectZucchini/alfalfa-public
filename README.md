@@ -1,4 +1,4 @@
-# alfalfa-public
+# Alfalfa
 
 *Fun, quirky, and wholesome achievements for GitHub that surprise and delight*
 
